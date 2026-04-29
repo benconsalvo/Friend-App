@@ -1,11 +1,10 @@
+// 1. Initialize Supabase IMMEDIATELY at the top of the file
+const supabaseUrl = 'https://zwjwewuiqlhiwxndvxij.supabase.co';
+const supabaseKey = 'sb_publishable_pBtHBqw1Kj_XTsRobi7LkA_aP9rZjQm'; 
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+// 2. Wait for the DOM to load before grabbing elements
 document.addEventListener('DOMContentLoaded', () => {
-
-    // --- 1. SUPABASE CONFIG ---
-    const supabaseUrl = 'https://zwjwewuiqlhiwxndvxij.supabase.co';
-    const supabaseKey = 'sb_publishable_pBtHBqw1Kj_XTsRobi7LkA_aP9rZjQm'; 
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    // --- 2. ELEMENTS ---
     const authContainer = document.getElementById('auth-container');
     const appContent = document.getElementById('app-content');
     const authBtn = document.getElementById('auth-btn');
@@ -16,9 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isSignUpMode = true;
 
-    // --- 3. AUTH LOGIC ---
-
-    // Toggle between Login and Sign Up
+    // Toggle Logic
     toggleAuth.addEventListener('click', () => {
         isSignUpMode = !isSignUpMode;
         document.getElementById('form-title').innerText = isSignUpMode ? 'Join Our App' : 'Welcome Back';
@@ -26,18 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleAuth.innerHTML = isSignUpMode ? 
             'Already have an account? <span>Log In</span>' : 
             'Need an account? <span>Sign Up</span>';
-        
         firstNameInput.style.display = isSignUpMode ? 'block' : 'none';
     });
 
-    // Main Auth Button Click
+    // Auth Button Logic
     authBtn.addEventListener('click', async () => {
         const email = emailInput.value;
         const password = passwordInput.value;
         const firstName = firstNameInput.value;
 
         if (isSignUpMode) {
-            // SIGN UP
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -45,25 +40,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (error) {
-                alert("Sign Up Error: " + error.message);
+                alert(error.message);
             } else if (data.user) {
-                // Store Name in Profiles Table
                 const { error: tableError } = await supabase
                     .from('profiles')
                     .insert([{ id: data.user.id, first_name: firstName }]);
-
-                if (tableError) console.error("Database Error:", tableError.message);
-                alert("Account created! Now switch to 'Log In'.");
+                
+                if (tableError) console.error(tableError);
+                alert("Account created! Now toggle to Log In.");
             }
         } else {
-            // LOG IN
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
             if (error) {
-                alert("Login Error: " + error.message);
+                alert(error.message);
             } else {
-                const name = data.user.user_metadata.first_name || "Friend";
-                startApp(name);
+                startApp(data.user.user_metadata.first_name || "Friend");
             }
         }
     });
@@ -74,10 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('welcome-msg').innerText = `Hi ${name}!`;
     }
 
-    // --- 4. HEART LOGIC ---
+    // Heart Logic
     document.getElementById('love-button').addEventListener('click', () => {
-        const msg = document.getElementById('message');
-        if (msg) msg.style.opacity = '1';
+        document.getElementById('message').style.opacity = '1';
         for (let i = 0; i < 15; i++) createHeart();
     });
 
