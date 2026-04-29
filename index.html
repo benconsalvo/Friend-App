@@ -1,23 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>My Mobile App</title>
-    
+    <title>Our App</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.PNG">
-    
     <link rel="manifest" href="manifest.json">
-    
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <button id="love-button">❤️</button>
-    <div id="message">I love you!</div>
+    <div id="auth-container">
+        <h2 id="form-title">Our Secret App</h2>
+        <div class="input-group" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <input type="text" id="first-name" placeholder="First Name">
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        
+        <button id="auth-btn">Sign Up</button>
+        <p id="toggle-auth">Already have an account? <span>Log In</span></p>
+    </div>
 
-    <script src="friend-app.js"></script>
+    <div id="app-content" style="display: none;">
+        <h2 id="welcome-msg"></h2>
+        <button id="love-button">❤️</button>
+        <div id="message">I love you!</div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>

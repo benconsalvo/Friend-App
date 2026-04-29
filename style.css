@@ -6,10 +6,86 @@ body {
     justify-content: center;
     align-items: center;
     background-color: #fff0f3;
-    font-family: -apple-system, system-ui, sans-serif;
-    overflow: hidden; /* Keeps hearts from creating scrollbars */
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden; 
+    touch-action: manipulation; /* Prevents double-tap zoom delay */
 }
 
+/* Auth Container Styling */
+#auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 85%;
+    max-width: 350px;
+    padding: 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(255, 77, 109, 0.1);
+    z-index: 20;
+}
+
+h2 {
+    color: #ff4d6d;
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid #ffccd5;
+    border-radius: 12px;
+    font-size: 16px; /* Critical for iOS zoom prevention */
+    box-sizing: border-box; /* Ensures padding doesn't break width */
+    outline: none;
+}
+
+input:focus {
+    border-color: #ff4d6d;
+}
+
+#auth-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #ff4d6d;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#toggle-auth {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #a3a3a3;
+}
+
+#toggle-auth span {
+    color: #ff4d6d;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* App Content Section */
+#app-content {
+    display: none; /* Controlled by JS */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#welcome-msg {
+    color: #ff4d6d;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+/* Your original button & heart styles */
 #love-button {
     font-size: 100px;
     background: none;
@@ -17,7 +93,7 @@ body {
     cursor: pointer;
     z-index: 10;
     transition: transform 0.1s;
-    -webkit-tap-highlight-color: transparent; /* Removes the grey box on iPhone tap */
+    -webkit-tap-highlight-color: transparent;
 }
 
 #love-button:active {
@@ -37,17 +113,11 @@ body {
     position: absolute;
     pointer-events: none;
     font-size: 24px;
-    /* Uses the variable we define in JS to determine the horizontal path */
     animation: floatUp 1.5s ease-out forwards;
+    z-index: 5;
 }
 
 @keyframes floatUp {
-    0% { 
-        transform: translate(0, 0) scale(1); 
-        opacity: 1; 
-    }
-    100% { 
-        transform: translate(var(--dx), -250px) scale(1.5); 
-        opacity: 0; 
-    }
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), -250px) scale(1.5); opacity: 0; }
 }
