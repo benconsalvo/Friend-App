@@ -1,4 +1,3 @@
-// Wait for the page to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. SUPABASE CONFIG ---
@@ -19,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. AUTH LOGIC ---
 
+    // Toggle between Login and Sign Up
     toggleAuth.addEventListener('click', () => {
         isSignUpMode = !isSignUpMode;
         document.getElementById('form-title').innerText = isSignUpMode ? 'Join Our App' : 'Welcome Back';
@@ -30,13 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
         firstNameInput.style.display = isSignUpMode ? 'block' : 'none';
     });
 
+    // Main Auth Button Click
     authBtn.addEventListener('click', async () => {
-        alert("Button was clicked!"); 
         const email = emailInput.value;
         const password = passwordInput.value;
         const firstName = firstNameInput.value;
 
         if (isSignUpMode) {
+            // SIGN UP
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -44,20 +45,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (error) {
-                alert(error.message);
-            } else {
+                alert("Sign Up Error: " + error.message);
+            } else if (data.user) {
+                // Store Name in Profiles Table
                 const { error: tableError } = await supabase
                     .from('profiles')
                     .insert([{ id: data.user.id, first_name: firstName }]);
 
-                if (tableError) console.error(tableError);
-                alert("Account created! Now toggle to Log In.");
+                if (tableError) console.error("Database Error:", tableError.message);
+                alert("Account created! Now switch to 'Log In'.");
             }
         } else {
+            // LOG IN
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
             if (error) {
-                alert(error.message);
+                alert("Login Error: " + error.message);
             } else {
                 const name = data.user.user_metadata.first_name || "Friend";
                 startApp(name);
@@ -73,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 4. HEART LOGIC ---
     document.getElementById('love-button').addEventListener('click', () => {
-        document.getElementById('message').style.opacity = '1';
+        const msg = document.getElementById('message');
+        if (msg) msg.style.opacity = '1';
         for (let i = 0; i < 15; i++) createHeart();
     });
 
