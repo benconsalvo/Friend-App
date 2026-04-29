@@ -9,9 +9,12 @@ const appContent = document.getElementById('app-content');
 const authBtn = document.getElementById('auth-btn');
 const toggleAuth = document.getElementById('toggle-auth');
 const firstNameInput = document.getElementById('first-name');
-const lastNameInput = document.getElementById('last-name'); // Added
+const lastNameInput = document.getElementById('last-name');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
+
+const userSearch = document.getElementById('user-search');
+const searchResults = document.getElementById('search-results');
 
 let isSignUpMode = true;
 
@@ -26,78 +29,94 @@ toggleAuth.addEventListener('click', () => {
         'Need an account? <span>Sign Up</span>';
     
     firstNameInput.style.display = isSignUpMode ? 'block' : 'none';
-    lastNameInput.style.display = isSignUpMode ? 'block' : 'none'; // Toggle visibility
+    lastNameInput.style.display = isSignUpMode ? 'block' : 'none';
 });
 
 authBtn.addEventListener('click', async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
     const firstName = firstNameInput.value;
-    const lastName = lastNameInput.value; // Capture last name
+    const lastName = lastNameInput.value;
 
     if (isSignUpMode) {
-        // --- SIGN UP ---
         const { data, error } = await mySupabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: { 
-                    first_name: firstName,
-                    last_name: lastName // Store in Auth Metadata
-                }
-            }
+            email, password,
+            options: { data: { first_name: firstName, last_name: lastName } }
         });
 
         if (error) {
-            alert("Sign Up Error: " + error.message);
+            alert(error.message);
         } else if (data.user) {
-            // Store both names in Profiles Table
-            const { error: tableError } = await mySupabase
-                .from('profiles')
-                .insert([
-                    { 
-                        id: data.user.id, 
-                        first_name: firstName, 
-                        last_name: lastName 
-                    }
-                ]);
-
-            if (tableError) console.error("Table Error:", tableError.message);
-            
-            // Auto-login: Pass both names to the app
+            await mySupabase.from('users').insert([
+                { id: data.user.id, first_name: firstName, last_name: lastName }
+            ]);
             startApp(firstName, lastName);
         }
     } else {
-        // --- LOG IN ---
-        const { data, error } = await mySupabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-
+        const { data, error } = await mySupabase.auth.signInWithPassword({ email, password });
         if (error) {
-            alert("Login failed: " + error.message);
+            alert(error.message);
         } else {
-            // Retrieve names from the metadata we stored during sign up
-            const fName = data.user.user_metadata.first_name || "Friend";
-            const lName = data.user.user_metadata.last_name || "";
-            startApp(fName, lName);
+            startApp(data.user.user_metadata.first_name, data.user.user_metadata.last_name);
         }
     }
 });
 
-// Updated to accept and display both names
 function startApp(first, last) {
     authContainer.style.display = 'none';
     appContent.style.display = 'flex';
     document.getElementById('welcome-msg').innerText = `Hi ${first} ${last}!`;
 }
 
-// --- 4. HEART BURST LOGIC (Stays the same) ---
-document.getElementById('love-button').addEventListener('click', function() {
-    document.getElementById('message').style.opacity = '1';
-    for (let i = 0; i < 15; i++) {
-        createHeart();
+// --- 4. FRIEND SEARCH & ADD LOGIC ---
+
+userSearch.addEventListener('input', async (e) => {
+    const term = e.target.value.trim();
+    if (term.length < 2) {
+        searchResults.innerHTML = '';
+        return;
     }
+
+    // Search users by first or last name
+    const { data: users, error } = await mySupabase
+        .from('users')
+        .select('id, first_name, last_name')
+        .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
+        .limit(5);
+
+    if (users) {
+        searchResults.innerHTML = '';
+        users.forEach(u => {
+            const div = document.createElement('div');
+            div.className = 'search-item';
+            div.innerHTML = `
+                <span>${u.first_name} ${u.last_name}</span>
+                <button class="add-btn" onclick="addFriend('${u.id}')">Add</button>
+            `;
+            searchResults.appendChild(div);
+        });
+    }
+});
+
+// We attach addFriend to 'window' so the HTML button can see it
+window.addFriend = async (friendId) => {
+    const { data: { user } } = await mySupabase.auth.getUser();
+    
+    const { error } = await mySupabase
+        .from('friendships')
+        .insert([{ user_id: user.id, friend_id: friendId }]);
+
+    if (error) {
+        alert("You are already friends or there was an error!");
+    } else {
+        alert("Friend added!");
+    }
+};
+
+// --- 5. HEART LOGIC ---
+document.getElementById('love-button').addEventListener('click', () => {
+    document.getElementById('message').style.opacity = '1';
+    for (let i = 0; i < 15; i++) createHeart();
 });
 
 function createHeart() {
@@ -109,5 +128,5 @@ function createHeart() {
     const randomX = (Math.random() - 0.5) * 300; 
     heart.style.setProperty('--dx', `${randomX}px`);
     document.body.appendChild(heart);
-    setTimeout(() => { heart.remove(); }, 1500);
+    setTimeout(() => heart.remove(), 1500);
 }
