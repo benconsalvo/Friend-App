@@ -59,7 +59,10 @@ authBtn.addEventListener('click', async () => {
             if (tableError) {
                 console.error("Table Error:", tableError.message);
             }
-            alert("Success! You can now toggle to 'Log In'.");
+            
+            // --- AUTO LOGIN LOGIC ---
+            // Instead of asking to log in, we launch the app immediately
+            startApp(firstName);
         }
     } else {
         // --- LOG IN PROCESS ---
