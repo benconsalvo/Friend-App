@@ -15,6 +15,7 @@ const passwordInput = document.getElementById('password');
 
 const userSearch = document.getElementById('user-search');
 const searchResults = document.getElementById('search-results');
+const friendsListDiv = document.getElementById('friends-list');
 
 let isSignUpMode = true;
 
@@ -46,7 +47,6 @@ authBtn.addEventListener('click', async () => {
         if (error) {
             alert(error.message);
         } else if (data.user) {
-            // Save to 'users' table (order: id, created_at, first_name, last_name)
             await mySupabase.from('users').insert([
                 { id: data.user.id, first_name: firstName, last_name: lastName }
             ]);
@@ -66,9 +66,40 @@ function startApp(first, last) {
     authContainer.style.display = 'none';
     appContent.style.display = 'flex';
     document.getElementById('welcome-msg').innerText = `Hi ${first} ${last}!`;
+    loadFriends(); 
 }
 
 // --- 4. SEARCH & FRIEND LOGIC ---
+
+async function loadFriends() {
+    const { data: { user } } = await mySupabase.auth.getUser();
+
+    // Fetch friendships and join with users table
+    const { data: friendships, error } = await mySupabase
+        .from('friendships')
+        .select(`
+            friend_id,
+            users:friend_id (first_name, last_name)
+        `)
+        .eq('user_id', user.id);
+
+    if (error) {
+        console.error("Friends load error:", error);
+        return;
+    }
+
+    if (friendships && friendships.length > 0) {
+        friendsListDiv.innerHTML = '';
+        friendships.forEach(f => {
+            const friend = f.users;
+            const div = document.createElement('div');
+            div.className = 'search-item';
+            div.innerHTML = `<span>👤 ${friend.first_name} ${friend.last_name}</span>`;
+            friendsListDiv.appendChild(div);
+        });
+    }
+}
+
 userSearch.addEventListener('input', async (e) => {
     const term = e.target.value.trim();
     if (term.length < 2) {
@@ -98,14 +129,21 @@ userSearch.addEventListener('input', async (e) => {
 
 window.addFriend = async (friendId) => {
     const { data: { user } } = await mySupabase.auth.getUser();
+    
+    if (friendId === user.id) {
+        alert("You can't add yourself!");
+        return;
+    }
+
     const { error } = await mySupabase
         .from('friendships')
         .insert([{ user_id: user.id, friend_id: friendId }]);
 
     if (error) {
-        alert("Unable to add friend.");
+        alert("Already friends or database error.");
     } else {
         alert("Friend added!");
+        loadFriends();
     }
 };
 

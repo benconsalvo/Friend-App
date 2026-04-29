@@ -1,14 +1,15 @@
 body {
     margin: 0;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #fff0f3; /* Your pink theme */
+    background-color: #fff0f3;
     font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow: hidden; 
+    overflow-y: auto; 
     touch-action: manipulation;
+    padding: 20px 0;
 }
 
 /* Auth Container Styling */
@@ -96,7 +97,7 @@ input:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     box-sizing: border-box;
 }
 
@@ -117,6 +118,10 @@ input:focus {
     border-bottom: 1px solid #fff0f3;
 }
 
+.search-item:last-child {
+    border-bottom: none;
+}
+
 .add-btn { 
     background: #ff4d6d; 
     color: white; 
@@ -129,13 +134,14 @@ input:focus {
 
 /* Heart Styles */
 #love-button {
-    font-size: 100px;
+    font-size: 80px;
     background: none;
     border: none;
     cursor: pointer;
     z-index: 10;
     transition: transform 0.1s;
     -webkit-tap-highlight-color: transparent;
+    margin-top: 10px;
 }
 
 #love-button:active {
@@ -144,7 +150,7 @@ input:focus {
 
 #message {
     margin-top: 10px;
-    font-size: 28px;
+    font-size: 24px;
     color: #ff4d6d;
     font-weight: bold;
     opacity: 0;
