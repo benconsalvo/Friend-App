@@ -1,0 +1,53 @@
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff0f3;
+    font-family: -apple-system, system-ui, sans-serif;
+    overflow: hidden; /* Keeps hearts from creating scrollbars */
+}
+
+#love-button {
+    font-size: 100px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent; /* Removes the grey box on iPhone tap */
+}
+
+#love-button:active {
+    transform: scale(0.8);
+}
+
+#message {
+    margin-top: 20px;
+    font-size: 28px;
+    color: #ff4d6d;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+}
+
+.heart {
+    position: absolute;
+    pointer-events: none;
+    font-size: 24px;
+    /* Uses the variable we define in JS to determine the horizontal path */
+    animation: floatUp 1.5s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% { 
+        transform: translate(0, 0) scale(1); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translate(var(--dx), -250px) scale(1.5); 
+        opacity: 0; 
+    }
+}

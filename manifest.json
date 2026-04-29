@@ -1,0 +1,9 @@
+
+
+{
+  "_comment": "This is the instruction manual (it tells the iPhone 'Hey, I'm an app, here is my name and icon')",
+  "name": "My PC App",
+  "display": "standalone",
+  "start_url": "index.html",
+  "icons": [{ "src": "icon.PNG", "sizes": "512x512", "type": "image/png" }]
+}
