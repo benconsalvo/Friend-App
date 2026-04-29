@@ -19,7 +19,6 @@ const searchResults = document.getElementById('search-results');
 let isSignUpMode = true;
 
 // --- 3. AUTH LOGIC ---
-
 toggleAuth.addEventListener('click', () => {
     isSignUpMode = !isSignUpMode;
     document.getElementById('form-title').innerText = isSignUpMode ? 'Join Our App' : 'Welcome Back';
@@ -47,6 +46,7 @@ authBtn.addEventListener('click', async () => {
         if (error) {
             alert(error.message);
         } else if (data.user) {
+            // Save to 'users' table (order: id, created_at, first_name, last_name)
             await mySupabase.from('users').insert([
                 { id: data.user.id, first_name: firstName, last_name: lastName }
             ]);
@@ -68,8 +68,7 @@ function startApp(first, last) {
     document.getElementById('welcome-msg').innerText = `Hi ${first} ${last}!`;
 }
 
-// --- 4. FRIEND SEARCH & ADD LOGIC ---
-
+// --- 4. SEARCH & FRIEND LOGIC ---
 userSearch.addEventListener('input', async (e) => {
     const term = e.target.value.trim();
     if (term.length < 2) {
@@ -77,7 +76,6 @@ userSearch.addEventListener('input', async (e) => {
         return;
     }
 
-    // Search users by first or last name
     const { data: users, error } = await mySupabase
         .from('users')
         .select('id, first_name, last_name')
@@ -98,16 +96,14 @@ userSearch.addEventListener('input', async (e) => {
     }
 });
 
-// We attach addFriend to 'window' so the HTML button can see it
 window.addFriend = async (friendId) => {
     const { data: { user } } = await mySupabase.auth.getUser();
-    
     const { error } = await mySupabase
         .from('friendships')
         .insert([{ user_id: user.id, friend_id: friendId }]);
 
     if (error) {
-        alert("You are already friends or there was an error!");
+        alert("Unable to add friend.");
     } else {
         alert("Friend added!");
     }
@@ -123,8 +119,6 @@ function createHeart() {
     const heart = document.createElement('div');
     heart.className = 'heart';
     heart.innerHTML = '❤️';
-    heart.style.left = '50%';
-    heart.style.top = '50%';
     const randomX = (Math.random() - 0.5) * 300; 
     heart.style.setProperty('--dx', `${randomX}px`);
     document.body.appendChild(heart);

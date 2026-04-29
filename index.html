@@ -10,50 +10,29 @@
     <link rel="icon" href="data:,">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Basic styling for the search feature */
-        #search-section { margin: 20px 0; width: 100%; }
-        #user-search { width: 80%; padding: 10px; border-radius: 20px; border: 1px solid #ccc; }
-        #search-results { margin-top: 10px; text-align: left; max-width: 300px; margin-left: auto; margin-right: auto; }
-        .search-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 10px; 
-            background: white; 
-            border-bottom: 1px solid #eee;
-            border-radius: 8px;
-            margin-bottom: 5px;
-        }
-        .add-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
-    </style>
 </head>
 <body>
 
     <div id="auth-container">
         <h2 id="form-title">Our Secret App</h2>
-        <div class="input-group" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <input type="text" id="first-name" placeholder="First Name">
-            <input type="text" id="last-name" placeholder="Last Name">
-            <input type="email" id="email" placeholder="Email Address">
-            <input type="password" id="password" placeholder="Password">
-        </div>
+        <input type="text" id="first-name" placeholder="First Name">
+        <input type="text" id="last-name" placeholder="Last Name">
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
         <button id="auth-btn">Sign Up</button>
         <p id="toggle-auth">Already have an account? <span>Log In</span></p>
     </div>
 
-    <div id="app-content" style="display: none; flex-direction: column; align-items: center;">
+    <div id="app-content">
         <h2 id="welcome-msg"></h2>
         
-        <div id="search-section">
-            <input type="text" id="user-search" placeholder="Search for friends...">
+        <div class="social-box">
+            <input type="text" id="user-search" placeholder="Find friends...">
             <div id="search-results"></div>
         </div>
 
-        <hr style="width: 80%; margin: 20px 0;">
-
         <button id="love-button">❤️</button>
-        <div id="message" style="opacity: 0;">I love you!</div>
+        <div id="message">I love you!</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
