@@ -17,7 +17,8 @@ const userSearch = document.getElementById('user-search');
 const searchResults = document.getElementById('search-results');
 const friendsListDiv = document.getElementById('friends-list');
 
-let isSignUpMode = true;
+// SWITCH: Starts in Login mode now
+let isSignUpMode = false;
 
 // --- 3. AUTH LOGIC ---
 toggleAuth.addEventListener('click', () => {
@@ -28,6 +29,7 @@ toggleAuth.addEventListener('click', () => {
         'Already have an account? <span>Log In</span>' : 
         'Need an account? <span>Sign Up</span>';
     
+    // Toggle name visibility based on mode
     firstNameInput.style.display = isSignUpMode ? 'block' : 'none';
     lastNameInput.style.display = isSignUpMode ? 'block' : 'none';
 });
@@ -39,6 +41,7 @@ authBtn.addEventListener('click', async () => {
     const lastName = lastNameInput.value;
 
     if (isSignUpMode) {
+        // --- SIGN UP ---
         const { data, error } = await mySupabase.auth.signUp({
             email, password,
             options: { data: { first_name: firstName, last_name: lastName } }
@@ -53,6 +56,7 @@ authBtn.addEventListener('click', async () => {
             startApp(firstName, lastName);
         }
     } else {
+        // --- LOG IN ---
         const { data, error } = await mySupabase.auth.signInWithPassword({ email, password });
         if (error) {
             alert(error.message);
@@ -92,10 +96,12 @@ async function loadFriends() {
         friendsListDiv.innerHTML = '';
         friendships.forEach(f => {
             const friend = f.users;
-            const div = document.createElement('div');
-            div.className = 'search-item';
-            div.innerHTML = `<span>👤 ${friend.first_name} ${friend.last_name}</span>`;
-            friendsListDiv.appendChild(div);
+            if (friend) { // Safety check
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.innerHTML = `<span>👤 ${friend.first_name} ${friend.last_name}</span>`;
+                friendsListDiv.appendChild(div);
+            }
         });
     }
 }
