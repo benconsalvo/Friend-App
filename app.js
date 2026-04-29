@@ -17,7 +17,7 @@ const userSearch = document.getElementById('user-search');
 const searchResults = document.getElementById('search-results');
 const friendsListDiv = document.getElementById('friends-list');
 
-// SWITCH: Starts in Login mode now
+// Starts in Login mode
 let isSignUpMode = false;
 
 // --- 3. AUTH LOGIC ---
@@ -29,7 +29,6 @@ toggleAuth.addEventListener('click', () => {
         'Already have an account? <span>Log In</span>' : 
         'Need an account? <span>Sign Up</span>';
     
-    // Toggle name visibility based on mode
     firstNameInput.style.display = isSignUpMode ? 'block' : 'none';
     lastNameInput.style.display = isSignUpMode ? 'block' : 'none';
 });
@@ -41,7 +40,6 @@ authBtn.addEventListener('click', async () => {
     const lastName = lastNameInput.value;
 
     if (isSignUpMode) {
-        // --- SIGN UP ---
         const { data, error } = await mySupabase.auth.signUp({
             email, password,
             options: { data: { first_name: firstName, last_name: lastName } }
@@ -56,7 +54,6 @@ authBtn.addEventListener('click', async () => {
             startApp(firstName, lastName);
         }
     } else {
-        // --- LOG IN ---
         const { data, error } = await mySupabase.auth.signInWithPassword({ email, password });
         if (error) {
             alert(error.message);
@@ -78,25 +75,18 @@ function startApp(first, last) {
 async function loadFriends() {
     const { data: { user } } = await mySupabase.auth.getUser();
 
-    // Fetch friendships and join with users table
     const { data: friendships, error } = await mySupabase
         .from('friendships')
-        .select(`
-            friend_id,
-            users:friend_id (first_name, last_name)
-        `)
+        .select(`friend_id, users:friend_id (first_name, last_name)`)
         .eq('user_id', user.id);
 
-    if (error) {
-        console.error("Friends load error:", error);
-        return;
-    }
+    if (error) return console.error("Friends load error:", error);
 
     if (friendships && friendships.length > 0) {
         friendsListDiv.innerHTML = '';
         friendships.forEach(f => {
             const friend = f.users;
-            if (friend) { // Safety check
+            if (friend) {
                 const div = document.createElement('div');
                 div.className = 'search-item';
                 div.innerHTML = `<span>👤 ${friend.first_name} ${friend.last_name}</span>`;
@@ -113,7 +103,7 @@ userSearch.addEventListener('input', async (e) => {
         return;
     }
 
-    const { data: users, error } = await mySupabase
+    const { data: users } = await mySupabase
         .from('users')
         .select('id, first_name, last_name')
         .or(`first_name.ilike.%${term}%,last_name.ilike.%${term}%`)
@@ -141,12 +131,25 @@ window.addFriend = async (friendId) => {
         return;
     }
 
+    // CHECK FOR DUPLICATES: See if they are already in the friendships table
+    const { data: existing } = await mySupabase
+        .from('friendships')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('friend_id', friendId)
+        .single();
+
+    if (existing) {
+        alert("You are already friends!");
+        return;
+    }
+
     const { error } = await mySupabase
         .from('friendships')
         .insert([{ user_id: user.id, friend_id: friendId }]);
 
     if (error) {
-        alert("Already friends or database error.");
+        alert("Database error adding friend.");
     } else {
         alert("Friend added!");
         loadFriends();
