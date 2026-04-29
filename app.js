@@ -16,8 +16,9 @@ const passwordInput = document.getElementById('password');
 const userSearch = document.getElementById('user-search');
 const searchResults = document.getElementById('search-results');
 const friendsListDiv = document.getElementById('friends-list');
+const loveButton = document.getElementById('love-button');
+const logoutBtn = document.getElementById('logout-btn');
 
-// Starts in Login mode
 let isSignUpMode = false;
 
 // --- 3. AUTH LOGIC ---
@@ -63,6 +64,12 @@ authBtn.addEventListener('click', async () => {
     }
 });
 
+logoutBtn.addEventListener('click', async () => {
+    const { error } = await mySupabase.auth.signOut();
+    if (error) alert("Error signing out.");
+    else window.location.reload();
+});
+
 function startApp(first, last) {
     authContainer.style.display = 'none';
     appContent.style.display = 'flex';
@@ -71,7 +78,6 @@ function startApp(first, last) {
 }
 
 // --- 4. SEARCH & FRIEND LOGIC ---
-
 async function loadFriends() {
     const { data: { user } } = await mySupabase.auth.getUser();
 
@@ -125,13 +131,8 @@ userSearch.addEventListener('input', async (e) => {
 
 window.addFriend = async (friendId) => {
     const { data: { user } } = await mySupabase.auth.getUser();
-    
-    if (friendId === user.id) {
-        alert("You can't add yourself!");
-        return;
-    }
+    if (friendId === user.id) return alert("You can't add yourself!");
 
-    // CHECK FOR DUPLICATES: See if they are already in the friendships table
     const { data: existing } = await mySupabase
         .from('friendships')
         .select('id')
@@ -139,35 +140,48 @@ window.addFriend = async (friendId) => {
         .eq('friend_id', friendId)
         .single();
 
-    if (existing) {
-        alert("You are already friends!");
-        return;
-    }
+    if (existing) return alert("You are already friends!");
 
     const { error } = await mySupabase
         .from('friendships')
         .insert([{ user_id: user.id, friend_id: friendId }]);
 
-    if (error) {
-        alert("Database error adding friend.");
-    } else {
+    if (error) alert("Database error adding friend.");
+    else {
         alert("Friend added!");
         loadFriends();
     }
 };
 
 // --- 5. HEART LOGIC ---
-document.getElementById('love-button').addEventListener('click', () => {
+loveButton.addEventListener('click', () => {
     document.getElementById('message').style.opacity = '1';
-    for (let i = 0; i < 15; i++) createHeart();
+    const rect = loveButton.getBoundingClientRect();
+    const containerRect = appContent.getBoundingClientRect();
+    const centerX = rect.left - containerRect.left + rect.width / 2;
+    const centerY = rect.top - containerRect.top + rect.height / 2;
+
+    for (let i = 0; i < 15; i++) createHeart(centerX, centerY);
 });
 
-function createHeart() {
+function createHeart(x, y) {
     const heart = document.createElement('div');
     heart.className = 'heart';
     heart.innerHTML = '❤️';
+    heart.style.setProperty('--start-x', `${x}px`);
+    heart.style.setProperty('--start-y', `${y}px`);
     const randomX = (Math.random() - 0.5) * 300; 
     heart.style.setProperty('--dx', `${randomX}px`);
-    document.body.appendChild(heart);
+    appContent.appendChild(heart);
     setTimeout(() => heart.remove(), 1500);
 }
+
+// --- 6. PERSISTENT LOGIN CHECK ---
+async function checkExistingSession() {
+    const { data: { session } } = await mySupabase.auth.getSession();
+    if (session) {
+        const user = session.user;
+        startApp(user.user_metadata.first_name, user.user_metadata.last_name);
+    }
+}
+checkExistingSession();

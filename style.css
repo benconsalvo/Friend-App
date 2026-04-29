@@ -12,7 +12,6 @@ body {
     padding: 20px 0;
 }
 
-/* Auth Container Styling */
 #auth-container {
     display: flex;
     flex-direction: column;
@@ -26,10 +25,7 @@ body {
     z-index: 20;
 }
 
-h2 {
-    color: #ff4d6d;
-    margin-bottom: 20px;
-}
+h2 { color: #ff4d6d; margin-bottom: 20px; }
 
 input {
     width: 100%;
@@ -42,9 +38,7 @@ input {
     outline: none;
 }
 
-input:focus {
-    border-color: #ff4d6d;
-}
+input:focus { border-color: #ff4d6d; }
 
 #auth-btn {
     width: 100%;
@@ -72,22 +66,37 @@ input:focus {
     cursor: pointer;
 }
 
-/* App Content Section */
 #app-content {
     display: none; 
     flex-direction: column;
     align-items: center;
     width: 90%;
     max-width: 400px;
+    position: relative;
+}
+
+#logout-btn {
+    position: absolute;
+    top: -10px;
+    right: 0;
+    background: white;
+    color: #ff4d6d;
+    border: 2px solid #ff4d6d;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 30;
 }
 
 #welcome-msg {
     color: #ff4d6d;
     margin-bottom: 20px;
     font-size: 24px;
+    text-align: center;
 }
 
-/* Social Box Styling */
 .social-box {
     background: white;
     padding: 20px;
@@ -101,14 +110,7 @@ input:focus {
     box-sizing: border-box;
 }
 
-#user-search {
-    margin-bottom: 0;
-}
-
-#search-results {
-    width: 100%;
-    margin-top: 10px;
-}
+#search-results { width: 100%; margin-top: 10px; }
 
 .search-item { 
     display: flex; 
@@ -118,9 +120,7 @@ input:focus {
     border-bottom: 1px solid #fff0f3;
 }
 
-.search-item:last-child {
-    border-bottom: none;
-}
+.search-item:last-child { border-bottom: none; }
 
 .add-btn { 
     background: #ff4d6d; 
@@ -132,7 +132,6 @@ input:focus {
     cursor: pointer; 
 }
 
-/* Heart Styles */
 #love-button {
     font-size: 80px;
     background: none;
@@ -144,9 +143,7 @@ input:focus {
     margin-top: 10px;
 }
 
-#love-button:active {
-    transform: scale(0.8);
-}
+#love-button:active { transform: scale(0.8); }
 
 #message {
     margin-top: 10px;
@@ -163,8 +160,8 @@ input:focus {
     font-size: 24px;
     animation: floatUp 1.5s ease-out forwards;
     z-index: 5;
-    left: 50%;
-    top: 50%;
+    left: var(--start-x);
+    top: var(--start-y);
 }
 
 @keyframes floatUp {
