@@ -1,5 +1,4 @@
 // --- 1. SUPABASE CONFIG ---
-// We use 'mySupabase' to avoid name conflicts with the library
 const supabaseUrl = 'https://zwjwewuiqlhiwxndvxij.supabase.co';
 const supabaseKey = 'sb_publishable_pBtHBqw1Kj_XTsRobi7LkA_aP9rZjQm'; 
 const mySupabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -10,6 +9,7 @@ const appContent = document.getElementById('app-content');
 const authBtn = document.getElementById('auth-btn');
 const toggleAuth = document.getElementById('toggle-auth');
 const firstNameInput = document.getElementById('first-name');
+const lastNameInput = document.getElementById('last-name'); // Added
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 
@@ -17,7 +17,6 @@ let isSignUpMode = true;
 
 // --- 3. AUTH LOGIC ---
 
-// Toggle between Login and Sign Up
 toggleAuth.addEventListener('click', () => {
     isSignUpMode = !isSignUpMode;
     document.getElementById('form-title').innerText = isSignUpMode ? 'Join Our App' : 'Welcome Back';
@@ -26,46 +25,50 @@ toggleAuth.addEventListener('click', () => {
         'Already have an account? <span>Log In</span>' : 
         'Need an account? <span>Sign Up</span>';
     
-    // Hide name field if logging in
     firstNameInput.style.display = isSignUpMode ? 'block' : 'none';
+    lastNameInput.style.display = isSignUpMode ? 'block' : 'none'; // Toggle visibility
 });
 
-// Handle Button Click
 authBtn.addEventListener('click', async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
     const firstName = firstNameInput.value;
+    const lastName = lastNameInput.value; // Capture last name
 
     if (isSignUpMode) {
-        // --- SIGN UP PROCESS ---
+        // --- SIGN UP ---
         const { data, error } = await mySupabase.auth.signUp({
             email: email,
             password: password,
             options: {
-                data: { first_name: firstName }
+                data: { 
+                    first_name: firstName,
+                    last_name: lastName // Store in Auth Metadata
+                }
             }
         });
 
         if (error) {
             alert("Sign Up Error: " + error.message);
         } else if (data.user) {
-            // INSERT INTO YOUR PROFILES TABLE
+            // Store both names in Profiles Table
             const { error: tableError } = await mySupabase
                 .from('profiles')
                 .insert([
-                    { id: data.user.id, first_name: firstName }
+                    { 
+                        id: data.user.id, 
+                        first_name: firstName, 
+                        last_name: lastName 
+                    }
                 ]);
 
-            if (tableError) {
-                console.error("Table Error:", tableError.message);
-            }
+            if (tableError) console.error("Table Error:", tableError.message);
             
-            // --- AUTO LOGIN LOGIC ---
-            // Instead of asking to log in, we launch the app immediately
-            startApp(firstName);
+            // Auto-login: Pass both names to the app
+            startApp(firstName, lastName);
         }
     } else {
-        // --- LOG IN PROCESS ---
+        // --- LOG IN ---
         const { data, error } = await mySupabase.auth.signInWithPassword({
             email: email,
             password: password
@@ -74,24 +77,24 @@ authBtn.addEventListener('click', async () => {
         if (error) {
             alert("Login failed: " + error.message);
         } else {
-            const name = data.user.user_metadata.first_name || "Friend";
-            startApp(name);
+            // Retrieve names from the metadata we stored during sign up
+            const fName = data.user.user_metadata.first_name || "Friend";
+            const lName = data.user.user_metadata.last_name || "";
+            startApp(fName, lName);
         }
     }
 });
 
-function startApp(name) {
+// Updated to accept and display both names
+function startApp(first, last) {
     authContainer.style.display = 'none';
     appContent.style.display = 'flex';
-    document.getElementById('welcome-msg').innerText = `Hi ${name}!`;
+    document.getElementById('welcome-msg').innerText = `Hi ${first} ${last}!`;
 }
 
-// --- 4. HEART BURST LOGIC ---
-
+// --- 4. HEART BURST LOGIC (Stays the same) ---
 document.getElementById('love-button').addEventListener('click', function() {
-    const message = document.getElementById('message');
-    message.style.opacity = '1';
-
+    document.getElementById('message').style.opacity = '1';
     for (let i = 0; i < 15; i++) {
         createHeart();
     }
@@ -101,16 +104,10 @@ function createHeart() {
     const heart = document.createElement('div');
     heart.className = 'heart';
     heart.innerHTML = '❤️';
-    
     heart.style.left = '50%';
     heart.style.top = '50%';
-    
     const randomX = (Math.random() - 0.5) * 300; 
     heart.style.setProperty('--dx', `${randomX}px`);
-
     document.body.appendChild(heart);
-
-    setTimeout(() => {
-        heart.remove();
-    }, 1500);
+    setTimeout(() => { heart.remove(); }, 1500);
 }
